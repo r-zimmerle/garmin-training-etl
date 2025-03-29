@@ -1,0 +1,9 @@
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  workouts_output: "workouts/zwo"
+
+training_defaults:
+  duration_minutes: 30
+  intensity: "moderate"
+  author: "Rodrigo Zimmerle"
