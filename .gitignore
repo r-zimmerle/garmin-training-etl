@@ -18,6 +18,10 @@ data/processed/
 data/raw/
 !data/raw/.gitkeep
 
+data/structured/
+!data/structured/.gitkeep
+
+
 # Exported Garmin workouts
 workouts/zwo/
 !workouts/zwo/.gitkeep
@@ -35,3 +39,4 @@ Thumbs.db
 # Local editor swap files
 *.swp
 *.swo
+.env
