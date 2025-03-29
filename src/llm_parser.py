@@ -2,6 +2,7 @@
 
 import os
 import re
+import json
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -15,28 +16,28 @@ client = OpenAI(
     api_key=token
 )
 
-# Base path and markdown file
+# Define base project directory and markdown file path
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 markdown_path = os.path.join(BASE_DIR, "data", "processed", "Workout1.md")
 
-# Read markdown content
+# Read the markdown file containing the training plan
 with open(markdown_path, "r", encoding="utf-8") as f:
     markdown_text = f.read()
 
-# Extract only weeks 3 and 4 (optional filtering)
+# Optional: extract only weeks 3 and 4 using regex pattern
 match = re.search(r"(## SEMANA 3.*?)(## SEMANA 5|$)", markdown_text, re.DOTALL | re.IGNORECASE)
 selected_text = match.group(1).strip() if match else markdown_text
 
-# Prompt is in Portuguese (pt-BR) because the training plans are in that language, and I'm a Brazilian developer :)
-# English summary below:
+# Prompt is in Portuguese (pt-BR) because the original training plans are in this language
+# English summary:
 # ---
-# You are a virtual assistant specializing in sports training plans.
-# Please extract the running workouts from weeks 3 and 4 and organize them in the JSON format below,
-# grouping training days and blocks (warm-up, main set, cooldown).
+# You are a virtual assistant specializing in running training plans.
+# Extract the workouts from weeks 3 and 4 and structure them in valid JSON format,
+# grouping training days and blocks (warm-up, main, cooldown). Do not include comments or explanations.
 # ---
 prompt = f"""
 Você é um assistente especializado em planilhas de treino de corrida.
-Extraia os treinos das semanas 3 e 4 e organize no seguinte formato JSON:
+Extraia os treinos das semanas 3 e 4 e organize no seguinte formato JSON puro, sem explicações ou comentários:
 
 [
   {{
@@ -60,7 +61,7 @@ Aqui está o conteúdo da planilha:
 {selected_text}
 """
 
-# Call the LLM with the prompt
+# Send prompt to the LLM
 response = client.chat.completions.create(
     model="gpt-4o",
     messages=[
@@ -71,16 +72,28 @@ response = client.chat.completions.create(
     max_tokens=3000
 )
 
-# Extract and clean response content
-result = response.choices[0].message.content.strip()
+# Extract raw model response
+raw_result = response.choices[0].message.content.strip()
 
-# Ensure output directory exists
+# Extract JSON block only (remove markdown syntax if present)
+json_match = re.search(r"```json\s*(.*?)\s*```", raw_result, re.DOTALL)
+cleaned_json = json_match.group(1) if json_match else raw_result
+
+# Validate if the output is a valid JSON structure
+try:
+    parsed = json.loads(cleaned_json)
+except json.JSONDecodeError as e:
+    print("🚨 Error: Failed to parse JSON output. Please review the model's response:")
+    print(cleaned_json)
+    raise e
+
+# Ensure the output directory exists
 output_dir = os.path.join(BASE_DIR, "data", "structured")
 os.makedirs(output_dir, exist_ok=True)
 
-# Save as JSON file
+# Save validated and cleaned JSON to file
 json_path = os.path.join(output_dir, "Workout1.json")
 with open(json_path, "w", encoding="utf-8") as f:
-    f.write(result)
+    json.dump(parsed, f, indent=2, ensure_ascii=False)
 
-print(f"✅ JSON saved at: {json_path}")
+print(f"✅ Clean JSON saved to: {json_path}")
