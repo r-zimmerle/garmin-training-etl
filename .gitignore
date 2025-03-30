@@ -4,39 +4,43 @@ venv/
 
 # Python cache and temporary files
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
-*.pyd
 *.log
 *.tmp
+*.swp
+*.swo
+*~
 
-# Processed or temporary data files
-data/processed/
-!data/processed/.gitkeep
+# Dotenv file (secrets)
+.env
 
-# Raw input files (PDFs)
-data/raw/
-!data/raw/.gitkeep
-
-data/structured/
-!data/structured/.gitkeep
-
-
-# Exported Garmin workouts
-workouts/zwo/
-!workouts/zwo/.gitkeep
-
-# Jupyter checkpoints
-.ipynb_checkpoints/
-
-# VSCode project settings
+# VSCode settings
 .vscode/
 
 # OS system files
 .DS_Store
 Thumbs.db
 
-# Local editor swap files
-*.swp
-*.swo
-.env
+# Raw input files (PDFs)
+data/raw/
+!data/raw/.gitkeep
+
+data/processed/
+!data/processed/.gitkeep
+
+data/structured/csv_llm/
+data/structured/csv_manual/
+data/structured/fit/
+data/structured/json/
+data/structured/debug/
+
+# Exported Garmin workouts (ZWO files)
+workouts/zwo/
+!workouts/zwo/.gitkeep
+
+# FitCSVTool (not distributable)
+tools/FitCSVTool.jar
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
